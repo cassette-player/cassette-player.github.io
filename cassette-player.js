@@ -12,11 +12,14 @@ class CassettePlayer extends HTMLElement {
     this.ROTATION_SPEED = 0.25; // 360 degrees in 4 seconds
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
+    this.INSERT_ANIMATION_DURATION = 2000; // 2 seconds default
+    this.LID_HEIGHT_PERCENT = 71.4; // 250px / 350px - covers from top to just below cassette window
+    this.CASSETTE_START_POSITION_PERCENT = -150; // Start position above the window
     this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   static get observedAttributes() {
-    return ['src', 'title', 'artist', 'rotation-speed'];
+    return ['src', 'title', 'artist', 'rotation-speed', 'insert-animation-duration'];
   }
 
   connectedCallback() {
@@ -42,6 +45,18 @@ class CassettePlayer extends HTMLElement {
           this.ROTATION_SPEED = speed;
         } else {
           console.warn(`Invalid rotation-speed value: "${newValue}". Must be a positive number. Using current value: ${this.ROTATION_SPEED}`);
+        }
+      } else if (name === 'insert-animation-duration') {
+        const duration = parseFloat(newValue);
+        if (!isNaN(duration) && duration > 0) {
+          this.INSERT_ANIMATION_DURATION = duration;
+          // Update CSS variable if element is already rendered
+          const walkman = this.shadowRoot.querySelector('.walkman');
+          if (walkman) {
+            walkman.style.setProperty('--insert-duration', `${duration}ms`);
+          }
+        } else {
+          console.warn(`Invalid insert-animation-duration value: "${newValue}". Must be a positive number. Using current value: ${this.INSERT_ANIMATION_DURATION}`);
         }
       } else {
         this.render();
@@ -137,6 +152,56 @@ class CassettePlayer extends HTMLElement {
     logoArea.textContent = 'WALKMAN';
     
     svg.append(defs, body, window, logoArea);
+    return svg;
+  }
+
+  createLidSVG() {
+    const svg = this.createSVGElement('svg', {
+      viewBox: '0 0 400 250',
+      style: 'width: 100%; height: 100%;'
+    });
+
+    const defs = this.createSVGElement('defs');
+    
+    // Lid gradient - slightly darker than body
+    const lidGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-lid`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
+    lidGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#4a4a4a' }),
+      this.createSVGElement('stop', { offset: '50%', 'stop-color': '#3a3a3a' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#2a2a2a' })
+    );
+    
+    defs.append(lidGradient);
+    
+    // Lid body
+    const lid = this.createSVGElement('rect', {
+      x: '0',
+      y: '0',
+      width: '400',
+      height: '250',
+      rx: '15',
+      fill: `url(#${this.instanceId}-lid)`,
+      stroke: '#000',
+      'stroke-width': '3'
+    });
+    
+    // Hinge line
+    const hinge = this.createSVGElement('line', {
+      x1: '0',
+      y1: '240',
+      x2: '400',
+      y2: '240',
+      stroke: '#555',
+      'stroke-width': '2'
+    });
+    
+    svg.append(defs, lid, hinge);
     return svg;
   }
 
@@ -320,10 +385,31 @@ class CassettePlayer extends HTMLElement {
       + '  width: 100%;'
       + '  max-width: 400px;'
       + '  margin: 0 auto;'
+      + '  overflow: hidden;'
       + '}'
       + '.walkman-body {'
       + '  position: relative;'
       + '  width: 100%;'
+      + '}'
+      + '.lid {'
+      + '  position: absolute;'
+      + '  top: 0;'
+      + '  left: 0;'
+      + '  right: 0;'
+      + `  height: ${this.LID_HEIGHT_PERCENT}%;`
+      + '  transform-origin: bottom center;'
+      + '  z-index: 10;'
+      + '  animation: lid-close var(--insert-duration) ease-out forwards;'
+      + '  animation-delay: var(--insert-duration);'
+      + '}'
+      + '@keyframes lid-close {'
+      + '  0% {'
+      + '    transform: rotateX(0deg);'
+      + '  }'
+      + '  100% {'
+      + '    transform: rotateX(-90deg);'
+      + '    opacity: 0;'
+      + '  }'
       + '}'
       + '.cassette-window {'
       + '  position: absolute;'
@@ -338,6 +424,15 @@ class CassettePlayer extends HTMLElement {
       + '  position: relative;'
       + '  width: 100%;'
       + '  height: 100%;'
+      + '  animation: cassette-insert var(--insert-duration) ease-out forwards;'
+      + '}'
+      + '@keyframes cassette-insert {'
+      + '  0% {'
+      + `    transform: translateY(${this.CASSETTE_START_POSITION_PERCENT}%);`
+      + '  }'
+      + '  100% {'
+      + '    transform: translateY(0);'
+      + '  }'
       + '}'
       + '.label-overlay {'
       + '  position: absolute;'
@@ -375,7 +470,7 @@ class CassettePlayer extends HTMLElement {
       + '  display: flex;'
       + '  justify-content: center;'
       + '  align-items: center;'
-      + '  gap: 60px;'
+      + '  gap: 98px;'
       + '  box-sizing: border-box;'
       + '}'
       + '.rotor-wrapper {'
@@ -438,9 +533,13 @@ class CassettePlayer extends HTMLElement {
       + '}';
 
     const walkman = this.createElement('div', { className: 'walkman' });
+    walkman.style.setProperty('--insert-duration', `${this.INSERT_ANIMATION_DURATION}ms`);
     
     const walkmanBody = this.createElement('div', { className: 'walkman-body' });
     walkmanBody.append(this.createWalkmanBodySVG());
+    
+    const lid = this.createElement('div', { className: 'lid' });
+    lid.append(this.createLidSVG());
     
     const cassetteWindow = this.createElement('div', { className: 'cassette-window' });
     
@@ -526,7 +625,7 @@ class CassettePlayer extends HTMLElement {
     
     controls.append(rewindBtn, playPauseBtn, forwardBtn, stopBtn, muteBtn);
     
-    walkmanBody.append(cassetteWindow, controls);
+    walkmanBody.append(lid, cassetteWindow, controls);
     walkman.append(walkmanBody);
     this.shadowRoot.append(style, walkman);
   }
