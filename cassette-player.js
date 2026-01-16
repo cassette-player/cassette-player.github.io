@@ -48,6 +48,11 @@ class CassettePlayer extends HTMLElement {
         const duration = parseFloat(newValue);
         if (!isNaN(duration) && duration > 0) {
           this.INSERT_ANIMATION_DURATION = duration;
+          // Update CSS variable if element is already rendered
+          const walkman = this.shadowRoot.querySelector('.walkman');
+          if (walkman) {
+            walkman.style.setProperty('--insert-duration', `${duration}ms`);
+          }
         } else {
           console.warn(`Invalid insert-animation-duration value: "${newValue}". Must be a positive number. Using current value: ${this.INSERT_ANIMATION_DURATION}`);
         }
@@ -384,6 +389,7 @@ class CassettePlayer extends HTMLElement {
       + '  position: relative;'
       + '  width: 100%;'
       + '}'
+      // Lid height: 250px / 350px = 71.4% - covers from top to just below cassette window
       + '.lid {'
       + '  position: absolute;'
       + '  top: 0;'
