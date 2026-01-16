@@ -13,7 +13,7 @@ class CassettePlayer extends HTMLElement {
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
     this.INSERT_ANIMATION_DURATION = 3000; // 3 seconds default
-    this.FAST_ROTATION_SPEED = 2.0; // Much faster rotation for rewind/forward
+    this.FAST_ROTATION_SPEED = 2.0; // 8x normal speed (2.0 vs 0.25 rotations/sec) for rewind/forward
     this.FAST_ROTATION_DURATION = 1000; // Duration of fast rotation in ms
     this.fastRotationMode = null; // null, 'forward', or 'rewind'
     this.fastRotationTimeout = null; // Track timeout to prevent race conditions
