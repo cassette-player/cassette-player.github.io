@@ -392,8 +392,8 @@ class CassettePlayer extends HTMLElement {
       + '  height: 71.4%;'
       + '  transform-origin: bottom center;'
       + '  z-index: 10;'
-      + '  animation: lid-close calc(var(--insert-duration) * 1ms) ease-out forwards;'
-      + '  animation-delay: calc(var(--insert-duration) * 1ms);'
+      + '  animation: lid-close var(--insert-duration) ease-out forwards;'
+      + '  animation-delay: var(--insert-duration);'
       + '}'
       + '@keyframes lid-close {'
       + '  0% {'
@@ -417,7 +417,7 @@ class CassettePlayer extends HTMLElement {
       + '  position: relative;'
       + '  width: 100%;'
       + '  height: 100%;'
-      + '  animation: cassette-insert calc(var(--insert-duration) * 1ms) ease-out forwards;'
+      + '  animation: cassette-insert var(--insert-duration) ease-out forwards;'
       + '}'
       + '@keyframes cassette-insert {'
       + '  0% {'
@@ -526,7 +526,7 @@ class CassettePlayer extends HTMLElement {
       + '}';
 
     const walkman = this.createElement('div', { className: 'walkman' });
-    walkman.style.setProperty('--insert-duration', this.INSERT_ANIMATION_DURATION);
+    walkman.style.setProperty('--insert-duration', `${this.INSERT_ANIMATION_DURATION}ms`);
     
     const walkmanBody = this.createElement('div', { className: 'walkman-body' });
     walkmanBody.append(this.createWalkmanBodySVG());
@@ -618,7 +618,7 @@ class CassettePlayer extends HTMLElement {
     
     controls.append(rewindBtn, playPauseBtn, forwardBtn, stopBtn, muteBtn);
     
-    walkmanBody.append(cassetteWindow, controls, lid);
+    walkmanBody.append(lid, cassetteWindow, controls);
     walkman.append(walkmanBody);
     this.shadowRoot.append(style, walkman);
   }
