@@ -7,15 +7,16 @@ class CassettePlayer extends HTMLElement {
     this.rotationOffset = 0;
     this.lastTime = null;
     this.isPlaying = false;
+    this.isMuted = false;
     this.DEFAULT_DURATION_SECONDS = 180;
     this.ROTATION_SPEED = 2;
-    this.MIN_ROTOR_SCALE = 0.5;
-    this.MAX_ROTOR_SCALE = 1.0;
-    this.instanceId = `cassette-${Math.random().toString(36).substr(2, 9)}`;
+    this.MIN_TAPE_SIZE = 20;
+    this.MAX_TAPE_SIZE = 50;
+    this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   static get observedAttributes() {
-    return ['src', 'img', 'title'];
+    return ['src', 'title', 'artist'];
   }
 
   connectedCallback() {
@@ -293,8 +294,8 @@ class CassettePlayer extends HTMLElement {
   }
 
   render() {
-    const img = this.getAttribute('img') || '';
     const title = this.getAttribute('title') || 'Untitled';
+    const artist = this.getAttribute('artist') || 'Unknown Artist';
 
     this.shadowRoot.innerHTML = '';
 
@@ -336,58 +337,49 @@ class CassettePlayer extends HTMLElement {
       + '  right: 6.25%;'
       + '  height: 33.3%;'
       + '  display: flex;'
-      + '  align-items: center;'
-      + '  gap: 8px;'
-      + '  padding: 6px;'
+      + '  flex-direction: column;'
+      + '  justify-content: center;'
+      + '  padding: 6px 10px;'
       + '  box-sizing: border-box;'
       + '}'
-      + '.label-image {'
-      + '  width: 40px;'
-      + '  height: 40px;'
-      + '  object-fit: cover;'
-      + '  border-radius: 2px;'
-      + '  background: #ccc;'
-      + '}'
-      + '.label-title {'
-      + '  flex: 1;'
-      + '  font-size: 12px;'
-      + '  font-weight: bold;'
-      + '  color: #333;'
+      + '.label-title, .label-artist {'
+      + '  font-family: "Brush Script MT", "Comic Sans MS", cursive;'
       + '  overflow: hidden;'
       + '  text-overflow: ellipsis;'
       + '  white-space: nowrap;'
       + '}'
+      + '.label-title {'
+      + '  font-size: 16px;'
+      + '  color: #333;'
+      + '  margin-bottom: 2px;'
+      + '}'
+      + '.label-artist {'
+      + '  font-size: 13px;'
+      + '  color: #666;'
+      + '}'
       + '.rotors-area {'
       + '  position: absolute;'
       + '  top: 50%;'
-      + '  left: 9.4%;'
-      + '  right: 9.4%;'
+      + '  left: 50%;'
+      + '  transform: translateX(-50%);'
       + '  height: 38.9%;'
       + '  display: flex;'
-      + '  justify-content: space-between;'
+      + '  justify-content: center;'
       + '  align-items: center;'
-      + '  padding: 0 15px;'
+      + '  gap: 30px;'
       + '  box-sizing: border-box;'
       + '}'
       + '.rotor-wrapper {'
       + '  position: relative;'
+      + '  display: flex;'
+      + '  align-items: center;'
       + '}'
-      + '.tape-strip {'
+      + '.tape-circle {'
       + '  position: absolute;'
-      + '  top: 50%;'
-      + '  height: 3px;'
-      + '  background: linear-gradient(to bottom, #5c3317, #8b4513, #5c3317);'
-      + '  transform: translateY(-50%);'
-      + '}'
-      + '.tape-left {'
-      + '  right: 100%;'
-      + '  width: 70px;'
-      + '  margin-right: -8px;'
-      + '}'
-      + '.tape-right {'
-      + '  left: 100%;'
-      + '  width: 70px;'
-      + '  margin-left: -8px;'
+      + '  border-radius: 50%;'
+      + '  border: 3px solid #8b4513;'
+      + '  transition: width 0.1s linear, height 0.1s linear;'
+      + '  pointer-events: none;'
       + '}'
       + '.controls {'
       + '  position: absolute;'
@@ -422,29 +414,17 @@ class CassettePlayer extends HTMLElement {
       + '  transform: translateY(1px);'
       + '  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);'
       + '}'
-      + '.control-btn.play-pause {'
-      + '  width: 60px;'
-      + '  height: 60px;'
-      + '  font-size: 20px;'
-      + '  background: linear-gradient(135deg, #666 0%, #444 100%);'
-      + '}'
       + '@media (max-width: 480px) {'
-      + '  .label-image {'
-      + '    width: 35px;'
-      + '    height: 35px;'
-      + '  }'
       + '  .label-title {'
+      + '    font-size: 14px;'
+      + '  }'
+      + '  .label-artist {'
       + '    font-size: 11px;'
       + '  }'
       + '  .control-btn {'
       + '    width: 45px;'
       + '    height: 45px;'
       + '    font-size: 14px;'
-      + '  }'
-      + '  .control-btn.play-pause {'
-      + '    width: 55px;'
-      + '    height: 55px;'
-      + '    font-size: 18px;'
       + '  }'
       + '}';
 
@@ -460,37 +440,36 @@ class CassettePlayer extends HTMLElement {
     
     const labelOverlay = this.createElement('div', { className: 'label-overlay' });
     
-    if (img) {
-      const labelImage = this.createElement('img', {
-        src: img,
-        alt: title,
-        className: 'label-image'
-      });
-      labelOverlay.append(labelImage);
-    } else {
-      labelOverlay.append(this.createElement('div', { className: 'label-image' }));
-    }
-    
-    labelOverlay.append(this.createElement('div', {
-      className: 'label-title',
-      textContent: title
-    }));
+    labelOverlay.append(
+      this.createElement('div', {
+        className: 'label-title',
+        textContent: title
+      }),
+      this.createElement('div', {
+        className: 'label-artist',
+        textContent: artist
+      })
+    );
     
     const rotorsArea = this.createElement('div', { className: 'rotors-area' });
     
     const leftRotorWrapper = this.createElement('div', { className: 'rotor-wrapper' });
     const leftRotor = this.createRotorSVG('left-rotor');
-    leftRotorWrapper.append(
-      leftRotor,
-      this.createElement('div', { className: 'tape-strip tape-left' })
-    );
+    const leftTapeCircle = this.createElement('div', { 
+      className: 'tape-circle',
+      id: 'left-tape-circle'
+    });
+    this.initTapeCircle(leftTapeCircle);
+    leftRotorWrapper.append(leftRotor, leftTapeCircle);
     
     const rightRotorWrapper = this.createElement('div', { className: 'rotor-wrapper' });
     const rightRotor = this.createRotorSVG('right-rotor');
-    rightRotorWrapper.append(
-      this.createElement('div', { className: 'tape-strip tape-right' }),
-      rightRotor
-    );
+    const rightTapeCircle = this.createElement('div', { 
+      className: 'tape-circle',
+      id: 'right-tape-circle'
+    });
+    this.initTapeCircle(rightTapeCircle);
+    rightRotorWrapper.append(rightRotor, rightTapeCircle);
     
     rotorsArea.append(leftRotorWrapper, rightRotorWrapper);
     
@@ -507,7 +486,7 @@ class CassettePlayer extends HTMLElement {
     rewindBtn.onclick = () => this.rewind();
     
     const playPauseBtn = this.createElement('button', { 
-      className: 'control-btn play-pause',
+      className: 'control-btn',
       textContent: '▶',
       title: 'Play/Pause',
       id: 'play-pause-btn'
@@ -528,7 +507,15 @@ class CassettePlayer extends HTMLElement {
     });
     stopBtn.onclick = () => this.stop();
     
-    controls.append(rewindBtn, playPauseBtn, forwardBtn, stopBtn);
+    const muteBtn = this.createElement('button', { 
+      className: 'control-btn',
+      textContent: '🔊',
+      title: 'Mute/Unmute',
+      id: 'mute-btn'
+    });
+    muteBtn.onclick = () => this.toggleMute();
+    
+    controls.append(rewindBtn, playPauseBtn, forwardBtn, stopBtn, muteBtn);
     
     walkmanBody.append(cassetteWindow, controls);
     walkman.append(walkmanBody);
@@ -607,6 +594,22 @@ class CassettePlayer extends HTMLElement {
     }
   }
 
+  toggleMute() {
+    if (this.audio) {
+      this.isMuted = !this.isMuted;
+      this.audio.muted = this.isMuted;
+      this.updateMuteButton();
+    }
+  }
+
+  updateMuteButton() {
+    const btn = this.shadowRoot.getElementById('mute-btn');
+    if (btn) {
+      btn.textContent = this.isMuted ? '🔇' : '🔊';
+      btn.title = this.isMuted ? 'Unmute' : 'Mute';
+    }
+  }
+
   startAnimation() {
     this.lastTime = performance.now();
     this.animate();
@@ -620,11 +623,24 @@ class CassettePlayer extends HTMLElement {
     this.lastTime = null;
   }
 
+  setTapeCircleSize(element, size) {
+    element.style.width = `${size}px`;
+    element.style.height = `${size}px`;
+  }
+
+  initTapeCircle(element) {
+    element.style.left = '50%';
+    element.style.top = '50%';
+    element.style.transform = 'translate(-50%, -50%)';
+  }
+
   animate() {
     const leftRotor = this.shadowRoot.getElementById('left-rotor');
     const rightRotor = this.shadowRoot.getElementById('right-rotor');
+    const leftTapeCircle = this.shadowRoot.getElementById('left-tape-circle');
+    const rightTapeCircle = this.shadowRoot.getElementById('right-tape-circle');
 
-    if (!leftRotor || !rightRotor || !this.audio) return;
+    if (!leftRotor || !rightRotor || !leftTapeCircle || !rightTapeCircle || !this.audio) return;
 
     const now = performance.now();
     if (this.lastTime) {
@@ -637,11 +653,16 @@ class CassettePlayer extends HTMLElement {
     const duration = this.audio.duration || this.DEFAULT_DURATION_SECONDS;
     const progress = duration > 0 ? Math.min(this.audio.currentTime / duration, 1) : 0;
 
-    const leftScale = this.MAX_ROTOR_SCALE - (progress * this.MIN_ROTOR_SCALE);
-    const rightScale = this.MIN_ROTOR_SCALE + (progress * this.MIN_ROTOR_SCALE);
+    // Rotors stay the same size and just rotate
+    leftRotor.style.transform = `rotate(${rotation}deg)`;
+    rightRotor.style.transform = `rotate(${rotation}deg)`;
 
-    leftRotor.style.transform = `rotate(${rotation}deg) scale(${leftScale})`;
-    rightRotor.style.transform = `rotate(${rotation}deg) scale(${rightScale})`;
+    // Tape circles grow and shrink
+    const leftTapeSize = this.MAX_TAPE_SIZE - (progress * (this.MAX_TAPE_SIZE - this.MIN_TAPE_SIZE));
+    const rightTapeSize = this.MIN_TAPE_SIZE + (progress * (this.MAX_TAPE_SIZE - this.MIN_TAPE_SIZE));
+    
+    this.setTapeCircleSize(leftTapeCircle, leftTapeSize);
+    this.setTapeCircleSize(rightTapeCircle, rightTapeSize);
 
     this.animationFrame = requestAnimationFrame(() => this.animate());
   }
@@ -649,12 +670,22 @@ class CassettePlayer extends HTMLElement {
   resetRotors() {
     const leftRotor = this.shadowRoot.getElementById('left-rotor');
     const rightRotor = this.shadowRoot.getElementById('right-rotor');
+    const leftTapeCircle = this.shadowRoot.getElementById('left-tape-circle');
+    const rightTapeCircle = this.shadowRoot.getElementById('right-tape-circle');
 
     if (leftRotor) {
-      leftRotor.style.transform = `rotate(0deg) scale(${this.MAX_ROTOR_SCALE})`;
+      leftRotor.style.transform = 'rotate(0deg)';
     }
     if (rightRotor) {
-      rightRotor.style.transform = `rotate(0deg) scale(${this.MIN_ROTOR_SCALE})`;
+      rightRotor.style.transform = 'rotate(0deg)';
+    }
+    
+    if (leftTapeCircle) {
+      this.setTapeCircleSize(leftTapeCircle, this.MAX_TAPE_SIZE);
+    }
+    
+    if (rightTapeCircle) {
+      this.setTapeCircleSize(rightTapeCircle, this.MIN_TAPE_SIZE);
     }
 
     this.rotationOffset = 0;
