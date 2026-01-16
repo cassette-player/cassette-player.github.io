@@ -4,8 +4,12 @@ class CassettePlayer extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.audio = null;
     this.animationFrame = null;
-    this.startTime = null;
-    this.duration = 180; // Default 3 minutes for tape animation
+    this.rotationOffset = 0; // Track rotation progress
+    this.lastTime = null;
+    this.DEFAULT_DURATION_SECONDS = 180; // Default 3 minutes for tape animation
+    this.ROTATION_SPEED = 2; // Degrees per second
+    this.MIN_ROTOR_SCALE = 0.5;
+    this.MAX_ROTOR_SCALE = 1.0;
   }
 
   static get observedAttributes() {
@@ -290,7 +294,7 @@ class CassettePlayer extends HTMLElement {
     this.audio = new Audio(src);
     
     this.audio.addEventListener('loadedmetadata', () => {
-      this.duration = this.audio.duration;
+      // Duration is set from audio metadata when available
     });
 
     this.audio.addEventListener('play', () => {
@@ -347,9 +351,7 @@ class CassettePlayer extends HTMLElement {
   }
 
   startAnimation() {
-    if (!this.startTime) {
-      this.startTime = Date.now();
-    }
+    this.lastTime = performance.now();
     this.animate();
   }
 
@@ -358,23 +360,31 @@ class CassettePlayer extends HTMLElement {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
+    this.lastTime = null;
   }
 
   animate() {
     const leftRotor = this.shadowRoot.getElementById('left-rotor');
     const rightRotor = this.shadowRoot.getElementById('right-rotor');
 
-    if (!leftRotor || !rightRotor) return;
+    if (!leftRotor || !rightRotor || !this.audio) return;
 
-    const elapsed = Date.now() - this.startTime;
-    const rotation = (elapsed / 50) % 360; // Rotate every 50ms
+    const now = performance.now();
+    if (this.lastTime) {
+      const delta = (now - this.lastTime) / 1000; // Convert to seconds
+      this.rotationOffset += delta * this.ROTATION_SPEED * 360;
+    }
+    this.lastTime = now;
 
-    // Calculate progress (0 to 1)
-    const progress = this.audio ? Math.min(this.audio.currentTime / this.duration, 1) : 0;
+    const rotation = this.rotationOffset % 360;
+
+    // Calculate progress (0 to 1) based on audio currentTime
+    const duration = this.audio.duration || this.DEFAULT_DURATION_SECONDS;
+    const progress = duration > 0 ? Math.min(this.audio.currentTime / duration, 1) : 0;
 
     // Left rotor shrinks, right rotor grows
-    const leftScale = 1 - (progress * 0.5); // Shrinks to 50%
-    const rightScale = 0.5 + (progress * 0.5); // Grows from 50% to 100%
+    const leftScale = this.MAX_ROTOR_SCALE - (progress * this.MIN_ROTOR_SCALE);
+    const rightScale = this.MIN_ROTOR_SCALE + (progress * this.MIN_ROTOR_SCALE);
 
     leftRotor.style.transform = `rotate(${rotation}deg) scale(${leftScale})`;
     rightRotor.style.transform = `rotate(${rotation}deg) scale(${rightScale})`;
@@ -387,13 +397,14 @@ class CassettePlayer extends HTMLElement {
     const rightRotor = this.shadowRoot.getElementById('right-rotor');
 
     if (leftRotor) {
-      leftRotor.style.transform = 'rotate(0deg) scale(1)';
+      leftRotor.style.transform = `rotate(0deg) scale(${this.MAX_ROTOR_SCALE})`;
     }
     if (rightRotor) {
-      rightRotor.style.transform = 'rotate(0deg) scale(0.5)';
+      rightRotor.style.transform = `rotate(0deg) scale(${this.MIN_ROTOR_SCALE})`;
     }
 
-    this.startTime = null;
+    this.rotationOffset = 0;
+    this.lastTime = null;
   }
 }
 
