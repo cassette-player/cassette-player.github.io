@@ -40,6 +40,8 @@ class CassettePlayer extends HTMLElement {
         const speed = parseFloat(newValue);
         if (!isNaN(speed) && speed > 0) {
           this.ROTATION_SPEED = speed;
+        } else {
+          console.warn(`Invalid rotation-speed value: "${newValue}". Must be a positive number. Using current value: ${this.ROTATION_SPEED}`);
         }
       } else {
         this.render();
