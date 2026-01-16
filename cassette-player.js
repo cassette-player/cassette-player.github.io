@@ -9,14 +9,14 @@ class CassettePlayer extends HTMLElement {
     this.isPlaying = false;
     this.isMuted = false;
     this.DEFAULT_DURATION_SECONDS = 180;
-    this.ROTATION_SPEED = 2;
+    this.ROTATION_SPEED = 0.25; // 360 degrees in 4 seconds
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
     this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   static get observedAttributes() {
-    return ['src', 'title', 'artist'];
+    return ['src', 'title', 'artist', 'rotation-speed'];
   }
 
   connectedCallback() {
@@ -36,9 +36,18 @@ class CassettePlayer extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue !== newValue) {
-      this.render();
-      if (name === 'src') {
-        this.setupAudio();
+      if (name === 'rotation-speed') {
+        const speed = parseFloat(newValue);
+        if (!isNaN(speed) && speed > 0) {
+          this.ROTATION_SPEED = speed;
+        } else {
+          console.warn(`Invalid rotation-speed value: "${newValue}". Must be a positive number. Using current value: ${this.ROTATION_SPEED}`);
+        }
+      } else {
+        this.render();
+        if (name === 'src') {
+          this.setupAudio();
+        }
       }
     }
   }
@@ -366,7 +375,7 @@ class CassettePlayer extends HTMLElement {
       + '  display: flex;'
       + '  justify-content: center;'
       + '  align-items: center;'
-      + '  gap: 30px;'
+      + '  gap: 60px;'
       + '  box-sizing: border-box;'
       + '}'
       + '.rotor-wrapper {'
