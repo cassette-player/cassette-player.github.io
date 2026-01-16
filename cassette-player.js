@@ -575,10 +575,10 @@ class CassettePlayer extends HTMLElement {
 
   togglePlayPause() {
     if (this.audio) {
-      if (this.isPlaying) {
-        this.audio.pause();
-      } else {
+      if (this.audio.paused) {
         this.audio.play();
+      } else {
+        this.audio.pause();
       }
     }
   }
@@ -591,7 +591,8 @@ class CassettePlayer extends HTMLElement {
 
   forward() {
     if (this.audio) {
-      this.audio.currentTime = Math.min(this.audio.duration || 0, this.audio.currentTime + 10);
+      const maxTime = isNaN(this.audio.duration) ? this.audio.currentTime + 10 : this.audio.duration;
+      this.audio.currentTime = Math.min(maxTime, this.audio.currentTime + 10);
     }
   }
 
