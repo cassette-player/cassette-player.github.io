@@ -342,22 +342,20 @@ class CassettePlayer extends HTMLElement {
       + '  padding: 6px 10px;'
       + '  box-sizing: border-box;'
       + '}'
-      + '.label-title {'
+      + '.label-title, .label-artist {'
       + '  font-family: "Brush Script MT", "Comic Sans MS", cursive;'
-      + '  font-size: 16px;'
-      + '  color: #333;'
-      + '  margin-bottom: 2px;'
       + '  overflow: hidden;'
       + '  text-overflow: ellipsis;'
       + '  white-space: nowrap;'
       + '}'
+      + '.label-title {'
+      + '  font-size: 16px;'
+      + '  color: #333;'
+      + '  margin-bottom: 2px;'
+      + '}'
       + '.label-artist {'
-      + '  font-family: "Brush Script MT", "Comic Sans MS", cursive;'
       + '  font-size: 13px;'
       + '  color: #666;'
-      + '  overflow: hidden;'
-      + '  text-overflow: ellipsis;'
-      + '  white-space: nowrap;'
       + '}'
       + '.rotors-area {'
       + '  position: absolute;'
@@ -461,6 +459,7 @@ class CassettePlayer extends HTMLElement {
       className: 'tape-circle',
       id: 'left-tape-circle'
     });
+    this.initTapeCircle(leftTapeCircle);
     leftRotorWrapper.append(leftRotor, leftTapeCircle);
     
     const rightRotorWrapper = this.createElement('div', { className: 'rotor-wrapper' });
@@ -469,6 +468,7 @@ class CassettePlayer extends HTMLElement {
       className: 'tape-circle',
       id: 'right-tape-circle'
     });
+    this.initTapeCircle(rightTapeCircle);
     rightRotorWrapper.append(rightRotor, rightTapeCircle);
     
     rotorsArea.append(leftRotorWrapper, rightRotorWrapper);
@@ -626,6 +626,9 @@ class CassettePlayer extends HTMLElement {
   setTapeCircleSize(element, size) {
     element.style.width = `${size}px`;
     element.style.height = `${size}px`;
+  }
+
+  initTapeCircle(element) {
     element.style.left = '50%';
     element.style.top = '50%';
     element.style.transform = 'translate(-50%, -50%)';
