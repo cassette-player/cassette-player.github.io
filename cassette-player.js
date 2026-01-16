@@ -13,6 +13,8 @@ class CassettePlayer extends HTMLElement {
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
     this.INSERT_ANIMATION_DURATION = 2000; // 2 seconds default
+    this.LID_HEIGHT_PERCENT = 71.4; // 250px / 350px - covers from top to just below cassette window
+    this.CASSETTE_START_POSITION_PERCENT = -150; // Start position above the window
     this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
   }
 
@@ -389,13 +391,12 @@ class CassettePlayer extends HTMLElement {
       + '  position: relative;'
       + '  width: 100%;'
       + '}'
-      // Lid height: 250px / 350px = 71.4% - covers from top to just below cassette window
       + '.lid {'
       + '  position: absolute;'
       + '  top: 0;'
       + '  left: 0;'
       + '  right: 0;'
-      + '  height: 71.4%;'
+      + `  height: ${this.LID_HEIGHT_PERCENT}%;`
       + '  transform-origin: bottom center;'
       + '  z-index: 10;'
       + '  animation: lid-close var(--insert-duration) ease-out forwards;'
@@ -427,7 +428,7 @@ class CassettePlayer extends HTMLElement {
       + '}'
       + '@keyframes cassette-insert {'
       + '  0% {'
-      + '    transform: translateY(-150%);'
+      + `    transform: translateY(${this.CASSETTE_START_POSITION_PERCENT}%);`
       + '  }'
       + '  100% {'
       + '    transform: translateY(0);'
