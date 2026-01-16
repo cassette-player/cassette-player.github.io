@@ -12,7 +12,9 @@ class CassettePlayer extends HTMLElement {
     this.ROTATION_SPEED = 0.25; // 360 degrees in 4 seconds
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
-    this.INSERT_ANIMATION_DURATION = 2000; // 2 seconds default
+    this.INSERT_ANIMATION_DURATION = 3000; // 3 seconds default
+    this.FAST_ROTATION_SPEED = 2.0; // Much faster rotation for rewind/forward
+    this.fastRotationMode = null; // null, 'forward', or 'rewind'
     this.LID_HEIGHT_PERCENT = 71.4; // 250px / 350px - covers from top to just below cassette window
     this.CASSETTE_START_POSITION_PERCENT = -150; // Start position above the window
     this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
@@ -681,6 +683,19 @@ class CassettePlayer extends HTMLElement {
   rewind() {
     if (this.audio) {
       this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
+      // Temporarily enable fast backward rotation
+      this.fastRotationMode = 'rewind';
+      if (!this.isPlaying) {
+        // If not playing, start animation temporarily for visual feedback
+        this.startAnimation();
+      }
+      // Stop fast rotation after 1 second
+      setTimeout(() => {
+        this.fastRotationMode = null;
+        if (!this.isPlaying) {
+          this.stopAnimation();
+        }
+      }, 1000);
     }
   }
 
@@ -688,6 +703,19 @@ class CassettePlayer extends HTMLElement {
     if (this.audio) {
       const maxTime = isNaN(this.audio.duration) ? this.audio.currentTime + 10 : this.audio.duration;
       this.audio.currentTime = Math.min(maxTime, this.audio.currentTime + 10);
+      // Temporarily enable fast forward rotation
+      this.fastRotationMode = 'forward';
+      if (!this.isPlaying) {
+        // If not playing, start animation temporarily for visual feedback
+        this.startAnimation();
+      }
+      // Stop fast rotation after 1 second
+      setTimeout(() => {
+        this.fastRotationMode = null;
+        if (!this.isPlaying) {
+          this.stopAnimation();
+        }
+      }, 1000);
     }
   }
 
@@ -753,7 +781,19 @@ class CassettePlayer extends HTMLElement {
     const now = performance.now();
     if (this.lastTime) {
       const delta = (now - this.lastTime) / 1000;
-      this.rotationOffset += delta * this.ROTATION_SPEED * 360;
+      // Use faster rotation speed when in fast rotation mode
+      let rotationSpeed = this.ROTATION_SPEED;
+      let rotationDirection = 1; // 1 for forward, -1 for backward
+      
+      if (this.fastRotationMode === 'forward') {
+        rotationSpeed = this.FAST_ROTATION_SPEED;
+        rotationDirection = 1;
+      } else if (this.fastRotationMode === 'rewind') {
+        rotationSpeed = this.FAST_ROTATION_SPEED;
+        rotationDirection = -1;
+      }
+      
+      this.rotationOffset += delta * rotationSpeed * 360 * rotationDirection;
     }
     this.lastTime = now;
 
