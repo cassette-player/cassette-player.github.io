@@ -10,6 +10,8 @@ class CassettePlayer extends HTMLElement {
     this.isMuted = false;
     this.DEFAULT_DURATION_SECONDS = 180;
     this.ROTATION_SPEED = 2;
+    this.MIN_TAPE_SIZE = 20;
+    this.MAX_TAPE_SIZE = 50;
     this.instanceId = `cassette-${Math.random().toString(36).substr(2, 9)}`;
   }
 
@@ -621,6 +623,14 @@ class CassettePlayer extends HTMLElement {
     this.lastTime = null;
   }
 
+  setTapeCircleSize(element, size) {
+    element.style.width = `${size}px`;
+    element.style.height = `${size}px`;
+    element.style.left = '50%';
+    element.style.top = '50%';
+    element.style.transform = 'translate(-50%, -50%)';
+  }
+
   animate() {
     const leftRotor = this.shadowRoot.getElementById('left-rotor');
     const rightRotor = this.shadowRoot.getElementById('right-rotor');
@@ -645,23 +655,11 @@ class CassettePlayer extends HTMLElement {
     rightRotor.style.transform = `rotate(${rotation}deg)`;
 
     // Tape circles grow and shrink
-    const minTapeSize = 20; // minimum tape circle size in pixels
-    const maxTapeSize = 50; // maximum tape circle size in pixels
+    const leftTapeSize = this.MAX_TAPE_SIZE - (progress * (this.MAX_TAPE_SIZE - this.MIN_TAPE_SIZE));
+    const rightTapeSize = this.MIN_TAPE_SIZE + (progress * (this.MAX_TAPE_SIZE - this.MIN_TAPE_SIZE));
     
-    const leftTapeSize = maxTapeSize - (progress * (maxTapeSize - minTapeSize));
-    const rightTapeSize = minTapeSize + (progress * (maxTapeSize - minTapeSize));
-    
-    leftTapeCircle.style.width = `${leftTapeSize}px`;
-    leftTapeCircle.style.height = `${leftTapeSize}px`;
-    leftTapeCircle.style.left = '50%';
-    leftTapeCircle.style.top = '50%';
-    leftTapeCircle.style.transform = 'translate(-50%, -50%)';
-    
-    rightTapeCircle.style.width = `${rightTapeSize}px`;
-    rightTapeCircle.style.height = `${rightTapeSize}px`;
-    rightTapeCircle.style.left = '50%';
-    rightTapeCircle.style.top = '50%';
-    rightTapeCircle.style.transform = 'translate(-50%, -50%)';
+    this.setTapeCircleSize(leftTapeCircle, leftTapeSize);
+    this.setTapeCircleSize(rightTapeCircle, rightTapeSize);
 
     this.animationFrame = requestAnimationFrame(() => this.animate());
   }
@@ -680,19 +678,11 @@ class CassettePlayer extends HTMLElement {
     }
     
     if (leftTapeCircle) {
-      leftTapeCircle.style.width = '50px';
-      leftTapeCircle.style.height = '50px';
-      leftTapeCircle.style.left = '50%';
-      leftTapeCircle.style.top = '50%';
-      leftTapeCircle.style.transform = 'translate(-50%, -50%)';
+      this.setTapeCircleSize(leftTapeCircle, this.MAX_TAPE_SIZE);
     }
     
     if (rightTapeCircle) {
-      rightTapeCircle.style.width = '20px';
-      rightTapeCircle.style.height = '20px';
-      rightTapeCircle.style.left = '50%';
-      rightTapeCircle.style.top = '50%';
-      rightTapeCircle.style.transform = 'translate(-50%, -50%)';
+      this.setTapeCircleSize(rightTapeCircle, this.MIN_TAPE_SIZE);
     }
 
     this.rotationOffset = 0;
