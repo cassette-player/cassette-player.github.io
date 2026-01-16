@@ -6,6 +6,7 @@ class CassettePlayer extends HTMLElement {
     this.animationFrame = null;
     this.rotationOffset = 0;
     this.lastTime = null;
+    this.isPlaying = false;
     this.DEFAULT_DURATION_SECONDS = 180;
     this.ROTATION_SPEED = 2;
     this.MIN_ROTOR_SCALE = 0.5;
@@ -51,112 +52,188 @@ class CassettePlayer extends HTMLElement {
     return el;
   }
 
-  createCassetteBodySVG() {
+  createWalkmanBodySVG() {
     const svg = this.createSVGElement('svg', {
-      viewBox: '0 0 400 250',
+      viewBox: '0 0 400 350',
       style: 'width: 100%; height: 100%;'
     });
 
-    // Main cassette body with realistic gradient
     const defs = this.createSVGElement('defs');
     
-    const bodyGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-bodyGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+    // Walkman body gradient
+    const bodyGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-walkmanBody`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
     bodyGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#1a1a1a' }),
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#3a3a3a' }),
       this.createSVGElement('stop', { offset: '50%', 'stop-color': '#2a2a2a' }),
       this.createSVGElement('stop', { offset: '100%', 'stop-color': '#1a1a1a' })
     );
     
-    const labelGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-labelGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
-    labelGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
-      this.createSVGElement('stop', { offset: '50%', 'stop-color': '#f5f5f5' }),
-      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#e0e0e0' })
-    );
-    
-    const windowGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-windowGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+    // Cassette window gradient
+    const windowGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-window`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
     windowGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': 'rgba(139, 69, 19, 0.2)' }),
-      this.createSVGElement('stop', { offset: '100%', 'stop-color': 'rgba(139, 69, 19, 0.4)' })
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': 'rgba(255, 255, 255, 0.1)' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': 'rgba(0, 0, 0, 0.3)' })
     );
     
-    defs.append(bodyGradient, labelGradient, windowGradient);
+    defs.append(bodyGradient, windowGradient);
     
-    // Main body
+    // Main Walkman body
     const body = this.createSVGElement('rect', {
       x: '0',
       y: '0',
       width: '400',
-      height: '250',
+      height: '350',
+      rx: '15',
+      fill: `url(#${this.instanceId}-walkmanBody)`,
+      stroke: '#000',
+      'stroke-width': '3'
+    });
+    
+    // Cassette viewing window
+    const window = this.createSVGElement('rect', {
+      x: '30',
+      y: '30',
+      width: '340',
+      height: '220',
       rx: '8',
-      fill: `url(#${this.instanceId}-bodyGradient)`,
+      fill: `url(#${this.instanceId}-window)`,
+      stroke: '#555',
+      'stroke-width': '2'
+    });
+    
+    // Sony logo area
+    const logoArea = this.createSVGElement('text', {
+      x: '200',
+      y: '285',
+      'text-anchor': 'middle',
+      fill: '#999',
+      'font-family': 'Arial, sans-serif',
+      'font-size': '18',
+      'font-weight': 'bold',
+      'letter-spacing': '3'
+    });
+    logoArea.textContent = 'WALKMAN';
+    
+    svg.append(defs, body, window, logoArea);
+    return svg;
+  }
+
+  createCassetteSVG() {
+    const svg = this.createSVGElement('svg', {
+      viewBox: '0 0 320 180',
+      style: 'width: 100%; height: 100%;'
+    });
+
+    const defs = this.createSVGElement('defs');
+    
+    const cassetteGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-cassette`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
+    cassetteGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#2a2a2a' }),
+      this.createSVGElement('stop', { offset: '50%', 'stop-color': '#1a1a1a' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#0a0a0a' })
+    );
+    
+    const labelGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-label`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
+    labelGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#e8e8e8' })
+    );
+    
+    const tapeWindowGradient = this.createSVGElement('linearGradient', { 
+      id: `${this.instanceId}-tapeWindow`, 
+      x1: '0%', 
+      y1: '0%', 
+      x2: '0%', 
+      y2: '100%' 
+    });
+    tapeWindowGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': 'rgba(139, 69, 19, 0.2)' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': 'rgba(139, 69, 19, 0.4)' })
+    );
+    
+    defs.append(cassetteGradient, labelGradient, tapeWindowGradient);
+    
+    // Cassette body
+    const body = this.createSVGElement('rect', {
+      x: '0',
+      y: '0',
+      width: '320',
+      height: '180',
+      rx: '6',
+      fill: `url(#${this.instanceId}-cassette)`,
       stroke: '#000',
       'stroke-width': '2'
     });
     
-    // Top label area
+    // Label area
     const label = this.createSVGElement('rect', {
       x: '20',
-      y: '20',
-      width: '360',
-      height: '80',
-      rx: '4',
-      fill: `url(#${this.instanceId}-labelGradient)`,
+      y: '15',
+      width: '280',
+      height: '60',
+      rx: '3',
+      fill: `url(#${this.instanceId}-label)`,
       stroke: '#ccc',
       'stroke-width': '1'
     });
     
-    // Tape window
-    const window = this.createSVGElement('rect', {
+    // Tape viewing area
+    const tapeArea = this.createSVGElement('rect', {
       x: '30',
-      y: '120',
-      width: '340',
-      height: '100',
-      rx: '4',
-      fill: `url(#${this.instanceId}-windowGradient)`,
-      stroke: '#555',
+      y: '90',
+      width: '260',
+      height: '70',
+      rx: '3',
+      fill: `url(#${this.instanceId}-tapeWindow)`,
+      stroke: '#444',
       'stroke-width': '1'
     });
     
-    // Screws for realism
-    const screw1 = this.createSVGElement('circle', { cx: '30', cy: '30', r: '4', fill: '#888' });
-    const screw2 = this.createSVGElement('circle', { cx: '370', cy: '30', r: '4', fill: '#888' });
-    const screw3 = this.createSVGElement('circle', { cx: '30', cy: '220', r: '4', fill: '#888' });
-    const screw4 = this.createSVGElement('circle', { cx: '370', cy: '220', r: '4', fill: '#888' });
+    // Screws
+    const screw1 = this.createSVGElement('circle', { cx: '25', cy: '25', r: '3', fill: '#777' });
+    const screw2 = this.createSVGElement('circle', { cx: '295', cy: '25', r: '3', fill: '#777' });
+    const screw3 = this.createSVGElement('circle', { cx: '25', cy: '155', r: '3', fill: '#777' });
+    const screw4 = this.createSVGElement('circle', { cx: '295', cy: '155', r: '3', fill: '#777' });
     
-    // Screw grooves
-    const groove1 = this.createSVGElement('line', { x1: '28', y1: '30', x2: '32', y2: '30', stroke: '#333', 'stroke-width': '1' });
-    const groove2 = this.createSVGElement('line', { x1: '368', y1: '30', x2: '372', y2: '30', stroke: '#333', 'stroke-width': '1' });
-    const groove3 = this.createSVGElement('line', { x1: '28', y1: '220', x2: '32', y2: '220', stroke: '#333', 'stroke-width': '1' });
-    const groove4 = this.createSVGElement('line', { x1: '368', y1: '220', x2: '372', y2: '220', stroke: '#333', 'stroke-width': '1' });
-    
-    svg.append(
-      defs,
-      body,
-      label,
-      window,
-      screw1,
-      screw2,
-      screw3,
-      screw4,
-      groove1,
-      groove2,
-      groove3,
-      groove4
-    );
-    
+    svg.append(defs, body, label, tapeArea, screw1, screw2, screw3, screw4);
     return svg;
   }
 
   createRotorSVG(id) {
     const svg = this.createSVGElement('svg', {
       viewBox: '0 0 100 100',
-      style: 'width: 60px; height: 60px; transition: transform 0.1s linear;',
+      style: 'width: 55px; height: 55px; transition: transform 0.1s linear;',
       id: id
     });
 
     const defs = this.createSVGElement('defs');
-    const rotorGradient = this.createSVGElement('radialGradient', { id: `${this.instanceId}-${id}-gradient` });
+    const rotorGradient = this.createSVGElement('radialGradient', { 
+      id: `${this.instanceId}-${id}-gradient` 
+    });
     rotorGradient.append(
       this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
       this.createSVGElement('stop', { offset: '70%', 'stop-color': '#f0f0f0' }),
@@ -164,7 +241,6 @@ class CassettePlayer extends HTMLElement {
     );
     defs.append(rotorGradient);
 
-    // Outer ring
     const outer = this.createSVGElement('circle', {
       cx: '50',
       cy: '50',
@@ -174,7 +250,6 @@ class CassettePlayer extends HTMLElement {
       'stroke-width': '2'
     });
 
-    // Teeth around the edge
     const teethGroup = this.createSVGElement('g');
     for (let i = 0; i < 6; i++) {
       const angle = (i * 60) - 90;
@@ -195,7 +270,6 @@ class CassettePlayer extends HTMLElement {
       teethGroup.append(tooth);
     }
 
-    // Center hub
     const centerHub = this.createSVGElement('circle', {
       cx: '50',
       cy: '50',
@@ -205,7 +279,6 @@ class CassettePlayer extends HTMLElement {
       'stroke-width': '1'
     });
 
-    // Inner details
     const innerRing = this.createSVGElement('circle', {
       cx: '50',
       cy: '50',
@@ -223,10 +296,8 @@ class CassettePlayer extends HTMLElement {
     const img = this.getAttribute('img') || '';
     const title = this.getAttribute('title') || 'Untitled';
 
-    // Clear shadow root
     this.shadowRoot.innerHTML = '';
 
-    // Create style element
     const style = this.createElement('style');
     style.textContent = ''
       + ':host {'
@@ -234,54 +305,68 @@ class CassettePlayer extends HTMLElement {
       + '  max-width: 100%;'
       + '  font-family: Arial, sans-serif;'
       + '}'
-      + '.cassette {'
+      + '.walkman {'
       + '  position: relative;'
       + '  width: 100%;'
       + '  max-width: 400px;'
       + '  margin: 0 auto;'
       + '}'
-      + '.svg-container {'
+      + '.walkman-body {'
       + '  position: relative;'
       + '  width: 100%;'
       + '}'
-      + '.label-content {'
+      + '.cassette-window {'
       + '  position: absolute;'
-      + '  top: 8%;'
-      + '  left: 5%;'
-      + '  right: 5%;'
-      + '  height: 32%;'
+      + '  top: 8.5%;'
+      + '  left: 7.5%;'
+      + '  right: 7.5%;'
+      + '  height: 63%;'
+      + '  display: flex;'
+      + '  flex-direction: column;'
+      + '}'
+      + '.cassette-container {'
+      + '  position: relative;'
+      + '  width: 100%;'
+      + '  height: 100%;'
+      + '}'
+      + '.label-overlay {'
+      + '  position: absolute;'
+      + '  top: 8.3%;'
+      + '  left: 6.25%;'
+      + '  right: 6.25%;'
+      + '  height: 33.3%;'
       + '  display: flex;'
       + '  align-items: center;'
-      + '  gap: 10px;'
-      + '  padding: 8px;'
+      + '  gap: 8px;'
+      + '  padding: 6px;'
       + '  box-sizing: border-box;'
       + '}'
       + '.label-image {'
-      + '  width: 50px;'
-      + '  height: 50px;'
+      + '  width: 40px;'
+      + '  height: 40px;'
       + '  object-fit: cover;'
       + '  border-radius: 2px;'
       + '  background: #ccc;'
       + '}'
       + '.label-title {'
       + '  flex: 1;'
-      + '  font-size: 14px;'
+      + '  font-size: 12px;'
       + '  font-weight: bold;'
       + '  color: #333;'
       + '  overflow: hidden;'
       + '  text-overflow: ellipsis;'
       + '  white-space: nowrap;'
       + '}'
-      + '.tape-area {'
+      + '.rotors-area {'
       + '  position: absolute;'
-      + '  top: 48%;'
-      + '  left: 7.5%;'
-      + '  right: 7.5%;'
-      + '  height: 40%;'
+      + '  top: 50%;'
+      + '  left: 9.4%;'
+      + '  right: 9.4%;'
+      + '  height: 38.9%;'
       + '  display: flex;'
       + '  justify-content: space-between;'
       + '  align-items: center;'
-      + '  padding: 0 20px;'
+      + '  padding: 0 15px;'
       + '  box-sizing: border-box;'
       + '}'
       + '.rotor-wrapper {'
@@ -296,59 +381,84 @@ class CassettePlayer extends HTMLElement {
       + '}'
       + '.tape-left {'
       + '  right: 100%;'
-      + '  width: 80px;'
-      + '  margin-right: -10px;'
+      + '  width: 70px;'
+      + '  margin-right: -8px;'
       + '}'
       + '.tape-right {'
       + '  left: 100%;'
-      + '  width: 80px;'
-      + '  margin-left: -10px;'
+      + '  width: 70px;'
+      + '  margin-left: -8px;'
       + '}'
       + '.controls {'
+      + '  position: absolute;'
+      + '  bottom: 10%;'
+      + '  left: 10%;'
+      + '  right: 10%;'
       + '  display: flex;'
       + '  justify-content: center;'
-      + '  gap: 10px;'
-      + '  margin-top: 15px;'
+      + '  gap: 8px;'
       + '}'
-      + 'button {'
-      + '  background: #333;'
+      + '.control-btn {'
+      + '  width: 50px;'
+      + '  height: 50px;'
+      + '  background: linear-gradient(135deg, #555 0%, #333 100%);'
       + '  color: white;'
-      + '  border: none;'
-      + '  border-radius: 4px;'
-      + '  padding: 8px 16px;'
+      + '  border: 2px solid #222;'
+      + '  border-radius: 50%;'
       + '  cursor: pointer;'
-      + '  font-size: 14px;'
-      + '  transition: background 0.2s;'
+      + '  font-size: 16px;'
+      + '  transition: all 0.2s;'
+      + '  display: flex;'
+      + '  align-items: center;'
+      + '  justify-content: center;'
+      + '  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);'
       + '}'
-      + 'button:hover {'
-      + '  background: #555;'
+      + '.control-btn:hover {'
+      + '  background: linear-gradient(135deg, #666 0%, #444 100%);'
+      + '  transform: translateY(-1px);'
+      + '  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);'
       + '}'
-      + 'button:active {'
-      + '  background: #222;'
+      + '.control-btn:active {'
+      + '  transform: translateY(1px);'
+      + '  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);'
+      + '}'
+      + '.control-btn.play-pause {'
+      + '  width: 60px;'
+      + '  height: 60px;'
+      + '  font-size: 20px;'
+      + '  background: linear-gradient(135deg, #666 0%, #444 100%);'
       + '}'
       + '@media (max-width: 480px) {'
       + '  .label-image {'
-      + '    width: 40px;'
-      + '    height: 40px;'
+      + '    width: 35px;'
+      + '    height: 35px;'
       + '  }'
       + '  .label-title {'
-      + '    font-size: 12px;'
+      + '    font-size: 11px;'
       + '  }'
-      + '  button {'
-      + '    padding: 6px 12px;'
-      + '    font-size: 12px;'
+      + '  .control-btn {'
+      + '    width: 45px;'
+      + '    height: 45px;'
+      + '    font-size: 14px;'
+      + '  }'
+      + '  .control-btn.play-pause {'
+      + '    width: 55px;'
+      + '    height: 55px;'
+      + '    font-size: 18px;'
       + '  }'
       + '}';
 
-    // Create main container
-    const cassette = this.createElement('div', { className: 'cassette' });
+    const walkman = this.createElement('div', { className: 'walkman' });
     
-    // Create SVG container
-    const svgContainer = this.createElement('div', { className: 'svg-container' });
-    svgContainer.append(this.createCassetteBodySVG());
+    const walkmanBody = this.createElement('div', { className: 'walkman-body' });
+    walkmanBody.append(this.createWalkmanBodySVG());
     
-    // Create label content overlay
-    const labelContent = this.createElement('div', { className: 'label-content' });
+    const cassetteWindow = this.createElement('div', { className: 'cassette-window' });
+    
+    const cassetteContainer = this.createElement('div', { className: 'cassette-container' });
+    cassetteContainer.append(this.createCassetteSVG());
+    
+    const labelOverlay = this.createElement('div', { className: 'label-overlay' });
     
     if (img) {
       const labelImage = this.createElement('img', {
@@ -356,18 +466,17 @@ class CassettePlayer extends HTMLElement {
         alt: title,
         className: 'label-image'
       });
-      labelContent.append(labelImage);
+      labelOverlay.append(labelImage);
     } else {
-      labelContent.append(this.createElement('div', { className: 'label-image' }));
+      labelOverlay.append(this.createElement('div', { className: 'label-image' }));
     }
     
-    labelContent.append(this.createElement('div', {
+    labelOverlay.append(this.createElement('div', {
       className: 'label-title',
       textContent: title
     }));
     
-    // Create tape area with rotors
-    const tapeArea = this.createElement('div', { className: 'tape-area' });
+    const rotorsArea = this.createElement('div', { className: 'rotors-area' });
     
     const leftRotorWrapper = this.createElement('div', { className: 'rotor-wrapper' });
     const leftRotor = this.createRotorSVG('left-rotor');
@@ -383,26 +492,47 @@ class CassettePlayer extends HTMLElement {
       rightRotor
     );
     
-    tapeArea.append(leftRotorWrapper, rightRotorWrapper);
+    rotorsArea.append(leftRotorWrapper, rightRotorWrapper);
     
-    // Create controls
+    cassetteContainer.append(labelOverlay, rotorsArea);
+    cassetteWindow.append(cassetteContainer);
+    
     const controls = this.createElement('div', { className: 'controls' });
     
-    const playBtn = this.createElement('button', { textContent: '▶ Play' });
-    playBtn.onclick = () => this.play();
+    const rewindBtn = this.createElement('button', { 
+      className: 'control-btn',
+      textContent: '⏪',
+      title: 'Rewind'
+    });
+    rewindBtn.onclick = () => this.rewind();
     
-    const pauseBtn = this.createElement('button', { textContent: '⏸ Pause' });
-    pauseBtn.onclick = () => this.pause();
+    const playPauseBtn = this.createElement('button', { 
+      className: 'control-btn play-pause',
+      textContent: '▶',
+      title: 'Play/Pause',
+      id: 'play-pause-btn'
+    });
+    playPauseBtn.onclick = () => this.togglePlayPause();
     
-    const stopBtn = this.createElement('button', { textContent: '⏹ Stop' });
+    const forwardBtn = this.createElement('button', { 
+      className: 'control-btn',
+      textContent: '⏩',
+      title: 'Forward'
+    });
+    forwardBtn.onclick = () => this.forward();
+    
+    const stopBtn = this.createElement('button', { 
+      className: 'control-btn',
+      textContent: '⏹',
+      title: 'Stop'
+    });
     stopBtn.onclick = () => this.stop();
     
-    controls.append(playBtn, pauseBtn, stopBtn);
+    controls.append(rewindBtn, playPauseBtn, forwardBtn, stopBtn);
     
-    // Assemble everything
-    svgContainer.append(labelContent, tapeArea);
-    cassette.append(svgContainer, controls);
-    this.shadowRoot.append(style, cassette);
+    walkmanBody.append(cassetteWindow, controls);
+    walkman.append(walkmanBody);
+    this.shadowRoot.append(style, walkman);
   }
 
   setupAudio() {
@@ -417,23 +547,51 @@ class CassettePlayer extends HTMLElement {
     this.audio.onloadedmetadata = () => {
       // Duration is available
     };
-    this.audio.onplay = () => this.startAnimation();
-    this.audio.onpause = () => this.stopAnimation();
+    this.audio.onplay = () => {
+      this.isPlaying = true;
+      this.updatePlayPauseButton();
+      this.startAnimation();
+    };
+    this.audio.onpause = () => {
+      this.isPlaying = false;
+      this.updatePlayPauseButton();
+      this.stopAnimation();
+    };
     this.audio.onended = () => {
+      this.isPlaying = false;
+      this.updatePlayPauseButton();
       this.stopAnimation();
       this.resetRotors();
     };
   }
 
-  play() {
-    if (this.audio) {
-      this.audio.play();
+  updatePlayPauseButton() {
+    const btn = this.shadowRoot.getElementById('play-pause-btn');
+    if (btn) {
+      btn.textContent = this.isPlaying ? '⏸' : '▶';
+      btn.title = this.isPlaying ? 'Pause' : 'Play';
     }
   }
 
-  pause() {
+  togglePlayPause() {
     if (this.audio) {
-      this.audio.pause();
+      if (this.isPlaying) {
+        this.audio.pause();
+      } else {
+        this.audio.play();
+      }
+    }
+  }
+
+  rewind() {
+    if (this.audio) {
+      this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
+    }
+  }
+
+  forward() {
+    if (this.audio) {
+      this.audio.currentTime = Math.min(this.audio.duration || 0, this.audio.currentTime + 10);
     }
   }
 
@@ -441,6 +599,8 @@ class CassettePlayer extends HTMLElement {
     if (this.audio) {
       this.audio.pause();
       this.audio.currentTime = 0;
+      this.isPlaying = false;
+      this.updatePlayPauseButton();
       this.stopAnimation();
       this.resetRotors();
     }
