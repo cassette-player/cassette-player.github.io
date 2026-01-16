@@ -14,7 +14,7 @@ class CassettePlayer extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['src', 'img', 'title', 'artist'];
+    return ['src', 'title', 'artist'];
   }
 
   connectedCallback() {
@@ -292,7 +292,6 @@ class CassettePlayer extends HTMLElement {
   }
 
   render() {
-    const img = this.getAttribute('img') || '';
     const title = this.getAttribute('title') || 'Untitled';
     const artist = this.getAttribute('artist') || 'Unknown Artist';
 

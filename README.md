@@ -8,10 +8,11 @@ A mobile-friendly Web Component that recreates the nostalgic experience of an 80
 
 - 🎨 **Authentic 80s Design**: Cassette tape with rounded corners, styled like a classic TDK tape
 - ⚙️ **Animated Rotors**: Two white plastic rotors visible behind the transparent window
-- 📼 **Realistic Playback**: Left rotor shrinks as tape plays, right rotor grows
-- 🖼️ **Custom Label**: Display cover image and song title on the cassette label
+- 📼 **Realistic Playback**: Brown tape winds and unwinds around fixed-size rotors like real cassettes
+- ✍️ **Custom Label**: Display song title and artist in handwriting-style font on the cassette label
 - 📱 **Mobile Friendly**: Fully responsive design that works on all devices
-- 🎵 **Audio Controls**: Play, pause, and stop buttons
+- 🎵 **Audio Controls**: Play, pause, stop, and mute buttons
+- ⏪⏩ **Seek Controls**: Rewind and fast-forward buttons
 - ✨ **Zero Dependencies**: Pure native JavaScript, no frameworks needed
 
 ## 🚀 Quick Start
@@ -27,8 +28,8 @@ Simply include the script and use the custom element:
 <body>
   <cassette-player 
     src="your-audio-file.mp3"
-    img="cover-image.jpg"
-    title="Your Song Title">
+    title="Your Song Title"
+    artist="Artist Name">
   </cassette-player>
 </body>
 </html>
@@ -39,8 +40,8 @@ Simply include the script and use the custom element:
 | Attribute | Type   | Description                           |
 |-----------|--------|---------------------------------------|
 | `src`     | String | URL to the MP3 audio file             |
-| `img`     | String | URL to the cover image (optional)     |
-| `title`   | String | Song or cassette title (optional)     |
+| `title`   | String | Song title (optional)                 |
+| `artist`  | String | Artist name (optional)                |
 
 ## 🎨 How It Works
 
