@@ -425,7 +425,7 @@ class CassettePlayer extends HTMLElement {
       + '}'
       + '@keyframes cassette-insert {'
       + '  0% {'
-      + '    transform: translateY(-150%);'
+      + `    transform: translateY(${this.CASSETTE_START_POSITION_PERCENT}%);`
       + '  }'
       + '  100% {'
       + '    transform: translateY(0);'
