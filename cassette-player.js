@@ -709,16 +709,22 @@ class CassettePlayer extends HTMLElement {
 
   rewind() {
     if (this.audio) {
-      this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
-      this.triggerFastRotation('rewind');
+      const newTime = Math.max(0, this.audio.currentTime - 10);
+      if (newTime !== this.audio.currentTime) {
+        this.audio.currentTime = newTime;
+        this.triggerFastRotation('rewind');
+      }
     }
   }
 
   forward() {
     if (this.audio) {
       const maxTime = isNaN(this.audio.duration) ? this.audio.currentTime + 10 : this.audio.duration;
-      this.audio.currentTime = Math.min(maxTime, this.audio.currentTime + 10);
-      this.triggerFastRotation('forward');
+      const newTime = Math.min(maxTime, this.audio.currentTime + 10);
+      if (newTime !== this.audio.currentTime) {
+        this.audio.currentTime = newTime;
+        this.triggerFastRotation('forward');
+      }
     }
   }
 
