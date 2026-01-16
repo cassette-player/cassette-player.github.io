@@ -12,7 +12,7 @@ class CassettePlayer extends HTMLElement {
     this.ROTATION_SPEED = 2;
     this.MIN_TAPE_SIZE = 20;
     this.MAX_TAPE_SIZE = 50;
-    this.instanceId = `cassette-${Math.random().toString(36).substr(2, 9)}`;
+    this.instanceId = `cassette-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   static get observedAttributes() {
