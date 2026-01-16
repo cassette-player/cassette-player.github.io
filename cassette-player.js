@@ -685,28 +685,32 @@ class CassettePlayer extends HTMLElement {
     }
   }
 
+  triggerFastRotation(mode) {
+    // Clear any existing fast rotation timeout to prevent race conditions
+    if (this.fastRotationTimeout) {
+      clearTimeout(this.fastRotationTimeout);
+      this.fastRotationTimeout = null;
+    }
+    // Enable fast rotation mode
+    this.fastRotationMode = mode;
+    if (!this.isPlaying) {
+      // If not playing, start animation temporarily for visual feedback
+      this.startAnimation();
+    }
+    // Stop fast rotation after duration
+    this.fastRotationTimeout = setTimeout(() => {
+      this.fastRotationMode = null;
+      this.fastRotationTimeout = null;
+      if (!this.isPlaying) {
+        this.stopAnimation();
+      }
+    }, this.FAST_ROTATION_DURATION);
+  }
+
   rewind() {
     if (this.audio) {
       this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
-      // Clear any existing fast rotation timeout to prevent race conditions
-      if (this.fastRotationTimeout) {
-        clearTimeout(this.fastRotationTimeout);
-        this.fastRotationTimeout = null;
-      }
-      // Temporarily enable fast backward rotation
-      this.fastRotationMode = 'rewind';
-      if (!this.isPlaying) {
-        // If not playing, start animation temporarily for visual feedback
-        this.startAnimation();
-      }
-      // Stop fast rotation after duration
-      this.fastRotationTimeout = setTimeout(() => {
-        this.fastRotationMode = null;
-        this.fastRotationTimeout = null;
-        if (!this.isPlaying) {
-          this.stopAnimation();
-        }
-      }, this.FAST_ROTATION_DURATION);
+      this.triggerFastRotation('rewind');
     }
   }
 
@@ -714,25 +718,7 @@ class CassettePlayer extends HTMLElement {
     if (this.audio) {
       const maxTime = isNaN(this.audio.duration) ? this.audio.currentTime + 10 : this.audio.duration;
       this.audio.currentTime = Math.min(maxTime, this.audio.currentTime + 10);
-      // Clear any existing fast rotation timeout to prevent race conditions
-      if (this.fastRotationTimeout) {
-        clearTimeout(this.fastRotationTimeout);
-        this.fastRotationTimeout = null;
-      }
-      // Temporarily enable fast forward rotation
-      this.fastRotationMode = 'forward';
-      if (!this.isPlaying) {
-        // If not playing, start animation temporarily for visual feedback
-        this.startAnimation();
-      }
-      // Stop fast rotation after duration
-      this.fastRotationTimeout = setTimeout(() => {
-        this.fastRotationMode = null;
-        this.fastRotationTimeout = null;
-        if (!this.isPlaying) {
-          this.stopAnimation();
-        }
-      }, this.FAST_ROTATION_DURATION);
+      this.triggerFastRotation('forward');
     }
   }
 
