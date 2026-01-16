@@ -42,6 +42,7 @@ Simply include the script and use the custom element:
 | `src`     | String | URL to the MP3 audio file             |
 | `title`   | String | Song title (optional)                 |
 | `artist`  | String | Artist name (optional)                |
+| `rotation-speed` | Number | Rotation speed in rotations per second (default: 0.25 = 4 seconds per rotation) |
 
 ## 🎨 How It Works
 
