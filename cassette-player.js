@@ -10,6 +10,7 @@ class CassettePlayer extends HTMLElement {
     this.ROTATION_SPEED = 2;
     this.MIN_ROTOR_SCALE = 0.5;
     this.MAX_ROTOR_SCALE = 1.0;
+    this.instanceId = `cassette-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   static get observedAttributes() {
@@ -59,21 +60,21 @@ class CassettePlayer extends HTMLElement {
     // Main cassette body with realistic gradient
     const defs = this.createSVGElement('defs');
     
-    const bodyGradient = this.createSVGElement('linearGradient', { id: 'bodyGradient', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+    const bodyGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-bodyGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
     bodyGradient.append(
       this.createSVGElement('stop', { offset: '0%', 'stop-color': '#1a1a1a' }),
       this.createSVGElement('stop', { offset: '50%', 'stop-color': '#2a2a2a' }),
       this.createSVGElement('stop', { offset: '100%', 'stop-color': '#1a1a1a' })
     );
     
-    const labelGradient = this.createSVGElement('linearGradient', { id: 'labelGradient', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+    const labelGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-labelGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
     labelGradient.append(
       this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
       this.createSVGElement('stop', { offset: '50%', 'stop-color': '#f5f5f5' }),
       this.createSVGElement('stop', { offset: '100%', 'stop-color': '#e0e0e0' })
     );
     
-    const windowGradient = this.createSVGElement('linearGradient', { id: 'windowGradient', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+    const windowGradient = this.createSVGElement('linearGradient', { id: `${this.instanceId}-windowGradient`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
     windowGradient.append(
       this.createSVGElement('stop', { offset: '0%', 'stop-color': 'rgba(139, 69, 19, 0.2)' }),
       this.createSVGElement('stop', { offset: '100%', 'stop-color': 'rgba(139, 69, 19, 0.4)' })
@@ -88,7 +89,7 @@ class CassettePlayer extends HTMLElement {
       width: '400',
       height: '250',
       rx: '8',
-      fill: 'url(#bodyGradient)',
+      fill: `url(#${this.instanceId}-bodyGradient)`,
       stroke: '#000',
       'stroke-width': '2'
     });
@@ -100,7 +101,7 @@ class CassettePlayer extends HTMLElement {
       width: '360',
       height: '80',
       rx: '4',
-      fill: 'url(#labelGradient)',
+      fill: `url(#${this.instanceId}-labelGradient)`,
       stroke: '#ccc',
       'stroke-width': '1'
     });
@@ -112,7 +113,7 @@ class CassettePlayer extends HTMLElement {
       width: '340',
       height: '100',
       rx: '4',
-      fill: 'url(#windowGradient)',
+      fill: `url(#${this.instanceId}-windowGradient)`,
       stroke: '#555',
       'stroke-width': '1'
     });
@@ -155,7 +156,7 @@ class CassettePlayer extends HTMLElement {
     });
 
     const defs = this.createSVGElement('defs');
-    const rotorGradient = this.createSVGElement('radialGradient', { id: `${id}-gradient` });
+    const rotorGradient = this.createSVGElement('radialGradient', { id: `${this.instanceId}-${id}-gradient` });
     rotorGradient.append(
       this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
       this.createSVGElement('stop', { offset: '70%', 'stop-color': '#f0f0f0' }),
@@ -168,7 +169,7 @@ class CassettePlayer extends HTMLElement {
       cx: '50',
       cy: '50',
       r: '48',
-      fill: `url(#${id}-gradient)`,
+      fill: `url(#${this.instanceId}-${id}-gradient)`,
       stroke: '#999',
       'stroke-width': '2'
     });
