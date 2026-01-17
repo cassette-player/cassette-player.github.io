@@ -219,89 +219,291 @@ class CassettePlayer extends HTMLElement {
     });
 
     const defs = this.createSVGElement('defs');
-    
-    const cassetteGradient = this.createSVGElement('linearGradient', { 
-      id: `${this.instanceId}-cassette`, 
-      x1: '0%', 
-      y1: '0%', 
-      x2: '0%', 
-      y2: '100%' 
+
+    const cassetteGradient = this.createSVGElement('linearGradient', {
+      id: `${this.instanceId}-cassette`,
+      x1: '0%',
+      y1: '0%',
+      x2: '0%',
+      y2: '100%'
     });
     cassetteGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#2a2a2a' }),
-      this.createSVGElement('stop', { offset: '50%', 'stop-color': '#1a1a1a' }),
-      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#0a0a0a' })
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#2b2b2d' }),
+      this.createSVGElement('stop', { offset: '60%', 'stop-color': '#1b1b1d' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#0f0f10' })
     );
-    
-    const labelGradient = this.createSVGElement('linearGradient', { 
-      id: `${this.instanceId}-label`, 
-      x1: '0%', 
-      y1: '0%', 
-      x2: '0%', 
-      y2: '100%' 
+
+    const labelGradient = this.createSVGElement('linearGradient', {
+      id: `${this.instanceId}-label`,
+      x1: '0%',
+      y1: '0%',
+      x2: '0%',
+      y2: '100%'
     });
     labelGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#ffffff' }),
-      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#e8e8e8' })
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#fafafa' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#e6e6e6' })
     );
-    
-    const tapeWindowGradient = this.createSVGElement('linearGradient', { 
-      id: `${this.instanceId}-tapeWindow`, 
-      x1: '0%', 
-      y1: '0%', 
-      x2: '0%', 
-      y2: '100%' 
+
+    const beigeStripGradient = this.createSVGElement('linearGradient', {
+      id: `${this.instanceId}-beige-strip`,
+      x1: '0%',
+      y1: '0%',
+      x2: '0%',
+      y2: '100%'
     });
-    tapeWindowGradient.append(
-      this.createSVGElement('stop', { offset: '0%', 'stop-color': 'rgba(139, 69, 19, 0.2)' }),
-      this.createSVGElement('stop', { offset: '100%', 'stop-color': 'rgba(139, 69, 19, 0.4)' })
+    beigeStripGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#e7c9a5' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#d8b38a' })
     );
-    
-    defs.append(cassetteGradient, labelGradient, tapeWindowGradient);
-    
-    // Cassette body
+
+    const ribPattern = this.createSVGElement('pattern', {
+      id: `${this.instanceId}-rib`,
+      width: '4',
+      height: '4',
+      patternUnits: 'userSpaceOnUse'
+    });
+    ribPattern.append(
+      this.createSVGElement('rect', { x: '0', y: '0', width: '4', height: '4', fill: '#141414' }),
+      this.createSVGElement('rect', { x: '0', y: '0', width: '4', height: '1', fill: '#222' })
+    );
+
+    const windowGradient = this.createSVGElement('linearGradient', {
+      id: `${this.instanceId}-window`,
+      x1: '0%',
+      y1: '0%',
+      x2: '0%',
+      y2: '100%'
+    });
+    windowGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#2a2a2a' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#0f0f0f' })
+    );
+
+    const reelGradient = this.createSVGElement('radialGradient', {
+      id: `${this.instanceId}-reel`,
+      cx: '50%',
+      cy: '50%',
+      r: '50%'
+    });
+    reelGradient.append(
+      this.createSVGElement('stop', { offset: '0%', 'stop-color': '#3a3a3a' }),
+      this.createSVGElement('stop', { offset: '100%', 'stop-color': '#121212' })
+    );
+
+    defs.append(
+      cassetteGradient,
+      labelGradient,
+      beigeStripGradient,
+      ribPattern,
+      windowGradient,
+      reelGradient
+    );
+
     const body = this.createSVGElement('rect', {
       x: '0',
       y: '0',
       width: '320',
       height: '180',
-      rx: '6',
+      rx: '8',
       fill: `url(#${this.instanceId}-cassette)`,
-      stroke: '#000',
+      stroke: '#050505',
       'stroke-width': '2'
     });
-    
-    // Label area
+
+    const topRib = this.createSVGElement('rect', {
+      x: '0',
+      y: '0',
+      width: '320',
+      height: '24',
+      fill: `url(#${this.instanceId}-rib)`
+    });
+
+    const bottomRib = this.createSVGElement('rect', {
+      x: '0',
+      y: '152',
+      width: '320',
+      height: '28',
+      fill: `url(#${this.instanceId}-rib)`
+    });
+
     const label = this.createSVGElement('rect', {
       x: '20',
-      y: '15',
+      y: '16',
       width: '280',
-      height: '60',
-      rx: '3',
+      height: '54',
+      rx: '4',
       fill: `url(#${this.instanceId}-label)`,
-      stroke: '#ccc',
+      stroke: '#c7c7c7',
       'stroke-width': '1'
     });
-    
-    // Tape viewing area
-    const tapeArea = this.createSVGElement('rect', {
-      x: '30',
-      y: '90',
-      width: '260',
-      height: '70',
+
+    const labelStrip = this.createSVGElement('rect', {
+      x: '20',
+      y: '58',
+      width: '280',
+      height: '12',
+      fill: `url(#${this.instanceId}-beige-strip)`
+    });
+
+    const windowFrame = this.createSVGElement('rect', {
+      x: '36',
+      y: '78',
+      width: '248',
+      height: '68',
+      rx: '4',
+      fill: '#0c0c0c',
+      stroke: '#2a2a2a',
+      'stroke-width': '1'
+    });
+
+    const windowGlass = this.createSVGElement('rect', {
+      x: '44',
+      y: '86',
+      width: '232',
+      height: '52',
       rx: '3',
-      fill: `url(#${this.instanceId}-tapeWindow)`,
-      stroke: '#444',
+      fill: `url(#${this.instanceId}-window)`,
+      stroke: '#1d1d1d',
       'stroke-width': '1'
     });
-    
-    // Screws
-    const screw1 = this.createSVGElement('circle', { cx: '25', cy: '25', r: '3', fill: '#777' });
-    const screw2 = this.createSVGElement('circle', { cx: '295', cy: '25', r: '3', fill: '#777' });
-    const screw3 = this.createSVGElement('circle', { cx: '25', cy: '155', r: '3', fill: '#777' });
-    const screw4 = this.createSVGElement('circle', { cx: '295', cy: '155', r: '3', fill: '#777' });
-    
-    svg.append(defs, body, label, tapeArea, screw1, screw2, screw3, screw4);
+
+    const leftReel = this.createSVGElement('circle', {
+      cx: '98',
+      cy: '112',
+      r: '22',
+      fill: `url(#${this.instanceId}-reel)`,
+      stroke: '#3a3a3a',
+      'stroke-width': '2'
+    });
+
+    const rightReel = this.createSVGElement('circle', {
+      cx: '222',
+      cy: '112',
+      r: '22',
+      fill: `url(#${this.instanceId}-reel)`,
+      stroke: '#3a3a3a',
+      'stroke-width': '2'
+    });
+
+    const centerWindow = this.createSVGElement('rect', {
+      x: '134',
+      y: '96',
+      width: '52',
+      height: '32',
+      rx: '3',
+      fill: '#151515',
+      stroke: '#2f2f2f',
+      'stroke-width': '1'
+    });
+
+    const centerSlit1 = this.createSVGElement('rect', {
+      x: '146',
+      y: '104',
+      width: '4',
+      height: '16',
+      rx: '2',
+      fill: '#303030'
+    });
+
+    const centerSlit2 = this.createSVGElement('rect', {
+      x: '158',
+      y: '104',
+      width: '4',
+      height: '16',
+      rx: '2',
+      fill: '#303030'
+    });
+
+    const centerSlit3 = this.createSVGElement('rect', {
+      x: '170',
+      y: '104',
+      width: '4',
+      height: '16',
+      rx: '2',
+      fill: '#303030'
+    });
+
+    const screw1 = this.createSVGElement('circle', { cx: '24', cy: '26', r: '3', fill: '#6f6f6f' });
+    const screw2 = this.createSVGElement('circle', { cx: '296', cy: '26', r: '3', fill: '#6f6f6f' });
+    const screw3 = this.createSVGElement('circle', { cx: '30', cy: '146', r: '3', fill: '#6f6f6f' });
+    const screw4 = this.createSVGElement('circle', { cx: '290', cy: '146', r: '3', fill: '#6f6f6f' });
+
+    const labelTextB = this.createSVGElement('text', {
+      x: '32',
+      y: '48',
+      fill: '#333',
+      'font-size': '20',
+      'font-family': 'Arial, sans-serif',
+      'font-weight': '700'
+    });
+    labelTextB.textContent = 'B';
+
+    const labelTextTDK = this.createSVGElement('text', {
+      x: '36',
+      y: '136',
+      fill: '#111',
+      'font-size': '14',
+      'font-family': 'Arial, sans-serif',
+      'font-weight': '700'
+    });
+    labelTextTDK.textContent = 'TDK';
+
+    const labelTextSA = this.createSVGElement('text', {
+      x: '212',
+      y: '136',
+      fill: '#f3f3f3',
+      'font-size': '16',
+      'font-family': 'Arial, sans-serif',
+      'font-weight': '700'
+    });
+    labelTextSA.textContent = 'SA';
+
+    const labelText90 = this.createSVGElement('text', {
+      x: '258',
+      y: '126',
+      fill: '#b6e21a',
+      'font-size': '18',
+      'font-family': 'Arial, sans-serif',
+      'font-weight': '700'
+    });
+    labelText90.textContent = '90';
+
+    const highBiasText = this.createSVGElement('text', {
+      x: '72',
+      y: '136',
+      fill: '#1f1f1f',
+      'font-size': '9',
+      'font-family': 'Arial, sans-serif'
+    });
+    highBiasText.textContent = 'High Bias 70μs EQ';
+
+    svg.append(
+      defs,
+      body,
+      topRib,
+      bottomRib,
+      label,
+      labelStrip,
+      windowFrame,
+      windowGlass,
+      leftReel,
+      rightReel,
+      centerWindow,
+      centerSlit1,
+      centerSlit2,
+      centerSlit3,
+      screw1,
+      screw2,
+      screw3,
+      screw4,
+      labelTextB,
+      labelTextTDK,
+      highBiasText,
+      labelTextSA,
+      labelText90
+    );
+
     return svg;
   }
 
